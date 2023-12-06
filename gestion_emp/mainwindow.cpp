@@ -292,3 +292,8 @@ void MainWindow::on_pushButton_clicked()
 
 
 }
+
+void MainWindow::on_led_clicked()
+{
+
+}

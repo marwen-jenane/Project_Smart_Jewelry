@@ -49,6 +49,8 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void on_led_clicked();
+
 private:
     Ui::MainWindow *ui;
     Employee emp;
