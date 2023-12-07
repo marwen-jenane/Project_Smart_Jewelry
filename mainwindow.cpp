@@ -48,19 +48,41 @@
 #include <QtCharts/QPieSeries>
 #include <QtCharts>
 #include <QPieSlice>
-
+#include <QTimer>
 using namespace QtCharts;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->le_ID->setValidator(new QIntValidator(0, 99999999, this));
+    ui->le_IDF->setValidator(new QIntValidator(0, 99999999, this));
     ui->tab_Fournisseur->setModel(F.afficher());
    // ui->comboBox->setModel(F.afficher());
     FournisseurStatisticsChartView = nullptr;
 
+
+    int ret=myArduino.connect_arduino();
+                  // lancer la connexion à arduino
+                 switch(ret){
+                 case(0):qDebug()<< "arduino is available and connected to : "<< myArduino.getarduino_port_name();
+                     break;
+                 case(1):qDebug() << "arduino is available but not connected to :" <<myArduino.getarduino_port_name();
+                    break;
+                 case(-1):qDebug() << "arduino is not available";
+                 }
+
+               //  QObject::connect(myArduino.getserial(),SIGNAL(readyRead()),this,SLOT(update_label()));
+
+                 timer = new QTimer(this);
+                      connect(timer, &QTimer::timeout, this, &MainWindow::loop);
+                      timer->start(5000);  // Démarrer le temporisa
+
+                      ui->le_IDF->setValidator(new QIntValidator(0, 99999999, this));
+                      ui->tab_Fournisseur->setModel(F.afficher());
+                     // ui->comboBox->setModel(F.afficher());
+                      FournisseurStatisticsChartView = nullptr;
 }
+
 
 MainWindow::~MainWindow()
 {
@@ -70,12 +92,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pb_ajouter_clicked()
 {
-    int ID=ui->le_ID->text().toInt();
-    QString nomF=ui->le_nom->text();
+
+
+    int ID=ui->le_IDF->text().toInt();
+    QString nomF=ui->le_nomF->text();
     QString nom_entreprise=ui->le_nomEntreprise->text();
-    QString adresse=ui->le_adresse->text();
-    QString email=ui->le_email->text();
-    int num=ui->le_numero->text().toInt();
+    QString adresse=ui->le_adresseF->text();
+    QString email=ui->le_emailF->text();
+    int num=ui->le_numeroF->text().toInt();
     Fournisseurs F ( ID,  nomF,  nom_entreprise,  adresse, email, num);
     historique H( ID,  nomF,  nom_entreprise,  adresse, email, num);
     bool test=F.ajouter();
@@ -87,12 +111,20 @@ void MainWindow::on_pb_ajouter_clicked()
              ui->tab_Fournisseur->setModel(F.afficher());
              N.NotificationAjouterFournisseur();
              H.saveAjoutFournisseur();
+
      }
      else
+    {
          QMessageBox::critical(nullptr, QObject::tr("FAILED"),
                      QObject::tr("Ajout failed.\n"
                                  "Click Cancel to exit."), QMessageBox::Cancel);
-
+     }
+    ui->le_IDF->clear();
+    ui->le_nomF->clear();
+    ui->le_nomEntreprise->clear();
+    ui->le_adresseF->clear();
+    ui->le_emailF->clear();
+    ui->le_numeroF->clear();
 }
 
 
@@ -112,12 +144,12 @@ void MainWindow::on_pb_supprimer_clicked()
     // Check if the ID exists in the database.
     Fournisseurs F1;
     historique H(id_a_supp,F1.getnomF(),F1.getnom_entreprise(),F1.getadresse(),F1.getemail(),F1.getnum());
-    F1.setID(id_a_supp);
+    F1.setIDF(id_a_supp);
 
     if (F1.idExists(id_a_supp))
     {
         // The ID exists, so proceed with the deletion.
-        bool test = F1.supprimer(F1.getID());
+        bool test = F1.supprimer(F1.getIDF());
 
         if (test) {
             QMessageBox::information(nullptr, QObject::tr("OK"),
@@ -142,15 +174,15 @@ void MainWindow::on_pb_supprimer_clicked()
 
 void MainWindow::on_pb_miseajour_clicked()
 {
-   int ID=ui->le_ID->text().toInt();
-    QString nomF=ui->le_nom->text();
+   int IDF=ui->le_IDF->text().toInt();
+    QString nomF=ui->le_nomF->text();
     QString nom_entreprise=ui->le_nomEntreprise->text();
-    QString adresse=ui->le_adresse->text();
-    QString email=ui->le_email->text();
-    int num=ui->le_numero->text().toInt();
+    QString adresse=ui->le_adresseF->text();
+    QString email=ui->le_emailF->text();
+    int num=ui->le_numeroF->text().toInt();
 
-    Fournisseurs F ( ID,  nomF,  nom_entreprise,  adresse,  email, num);
-    historique H(F.getID(),F.getnomF(),F.getnom_entreprise(),F.getadresse(),F.getemail(),F.getnum());
+    Fournisseurs F ( IDF,  nomF,  nom_entreprise,  adresse,  email, num);
+    historique H(F.getIDF(),F.getnomF(),F.getnom_entreprise(),F.getadresse(),F.getemail(),F.getnum());
 
     bool test=F.modifier();
     if(test)
@@ -161,22 +193,26 @@ void MainWindow::on_pb_miseajour_clicked()
             ui->tab_Fournisseur->setModel(F.afficher());
             N.NotificationModifierFournisseur();
             H.saveUpdateFournisseur(nomF,  nom_entreprise,  adresse,  email, num);
+
      }
      else
+    {
          QMessageBox::critical(nullptr, QObject::tr("FAILED"),
                      QObject::tr("mise à jour failed.\n"
                                  "Click Cancel to exit."), QMessageBox::Cancel);
+    }
+    ui->le_IDF->clear();
+    ui->le_nomF->clear();
+    ui->le_nomEntreprise->clear();
+    ui->le_adresseF->clear();
+    ui->le_emailF->clear();
+    ui->le_numeroF->clear();
 }
 
 void MainWindow::on_pb_clear_clicked()
 {
     // Effacez les champs d'entrée ou effectuez toute autre action que vous souhaitez
-    ui->le_ID->clear();
-    ui->le_nom->clear();
-    ui->le_nomEntreprise->clear();
-    ui->le_adresse->clear();
-    ui->le_email->clear();
-    ui->le_numero->clear();
+
 }
 
 void MainWindow::on_tab_Fournisseur_activated(const QModelIndex &index)
@@ -190,19 +226,19 @@ QModelIndex in=index.sibling(i,0);
 QString val=ui->tab_Fournisseur->model()->data(in).toString();
 
     QSqlQuery qry;
-    qry.prepare("select ID,nomF,nom_entreprise,adresse,email,num from GS_FOURNISSEURS where ID='"+val+"' " );
+    qry.prepare("select IDF,nomF,nom_entreprise,adresse,email,num from GS_FOURNISSEURS where IDF='"+val+"' " );
 
 
     if(qry.exec())
     {
         while(qry.next())
         {
-            ui->le_ID->setText(qry.value(0).toString());
-            ui->le_nom->setText(qry.value(1).toString());
+            ui->le_IDF->setText(qry.value(0).toString());
+            ui->le_nomF->setText(qry.value(1).toString());
             ui->le_nomEntreprise->setText(qry.value(2).toString());
-            ui->le_adresse->setText(qry.value(3).toString());
-            ui->le_email->setText(qry.value(4).toString());
-            ui->le_numero->setText(qry.value(5).toString());
+            ui->le_adresseF->setText(qry.value(3).toString());
+            ui->le_emailF->setText(qry.value(4).toString());
+            ui->le_numeroF->setText(qry.value(5).toString());
         }
     }
 }
@@ -266,7 +302,7 @@ void MainWindow::on_pb_PDF_clicked()
 
                       painter.setFont(QFont("Montserrat SemiBold", 10));
 
-                      painter.drawText(400,3600,"ID");
+                      painter.drawText(400,3600,"IDF");
                       painter.drawText(1500,3600,"nomF");
                       painter.drawText(2700,3600,"nom_entreprise");
                       painter.drawText(4100,3600,"adresse");
@@ -307,7 +343,7 @@ void MainWindow::on_tabWidget_tabBarClicked(int index)
         // If the clicked tab is the "stat" tab, update the Fournisseur statistics chart.
         update_Fournisseur_StatisticsChart();
     } else {
-        clearFournisseur_StatisticsChart();
+       // clearFournisseur_StatisticsChart();
     }
 }
 
@@ -326,7 +362,7 @@ void MainWindow::update_Fournisseur_StatisticsChart()
     QPieSeries *series = new QPieSeries();
 
     // Define colors for the pie chart slices.
-    QStringList colors = {"#55AA00", "#458C68", "#005500"};
+    QStringList colors = {"#55AA00",  "#005500","#0000FF", "#800080"};
     int colorIndex = 0;
 
     // Iterate over the statistics and add slices to the pie chart.
@@ -335,7 +371,7 @@ void MainWindow::update_Fournisseur_StatisticsChart()
         QPieSlice *slice = series->append(group, count);
 
          // Set the label for each slice with the percentage of the total.
-        slice->setLabel(group + ": " + QString::number(static_cast<double>(count) / totalFournisseurs * 100, 'f', 2) + "%");
+        slice->setLabel(group + ":\n " + QString::number(static_cast<double>(count) / totalFournisseurs * 100, 'f', 2) + "%");
 
         // Set the color for each slice
         if (colorIndex < colors.size()) {
@@ -347,12 +383,13 @@ void MainWindow::update_Fournisseur_StatisticsChart()
         colorIndex++;
     }
 
-   clearFournisseur_StatisticsChart();
+  // clearFournisseur_StatisticsChart();
 
     QChart *chart = new QChart();
     chart->addSeries(series);
-    chart->setTitle("Répartition par numero ");
+    chart->setTitle("Répartition par adresse ");
     chart->setBackgroundBrush(QBrush(QColor("#F5F5DC")));
+    chart->setAnimationOptions(QChart:: SeriesAnimations);
 
     FournisseurStatisticsChartView = new QChartView(chart);
     FournisseurStatisticsChartView->setRenderHint(QPainter::Antialiasing);
@@ -361,25 +398,6 @@ void MainWindow::update_Fournisseur_StatisticsChart()
 
     FournisseurStatisticsChartView->show();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 void MainWindow::clearFournisseur_StatisticsChart()
 {
@@ -390,3 +408,60 @@ void MainWindow::clearFournisseur_StatisticsChart()
     }
 }
 
+
+
+//********************Arduino**************************
+
+
+void MainWindow::loop() {
+    QByteArray data = myArduino.read_from_arduino();
+
+    // Nettoyer les caractères spéciaux "\r\n" de la chaîne
+    data = data.trimmed();
+
+    // Convertir les données nettoyées en int (ide)
+    bool conversionOk;
+    int UID = data.toInt(&conversionOk);
+
+    if (conversionOk) {
+        qDebug() << "ID Arduino converti avec succès : " << UID;
+
+        // Exécuter la requête SQL pour vérifier si le ID existe dans la table fournisseur
+        QSqlQuery checkQuery;
+        checkQuery.prepare("SELECT NOMF FROM GS_FOURNISSEURS WHERE IDF = :UID");
+        checkQuery.bindValue(":UID", UID);
+
+        if (checkQuery.exec() && checkQuery.next()) {
+            // La correspondance a été trouvée, récupérer le nom correspondant
+            QString nom = checkQuery.value(0).toString();
+
+            // Envoyer le nom à l'Arduino
+            QByteArray response = nom.toUtf8();
+            int writeResult = myArduino.write_to_arduino(response);
+
+            if (writeResult == 1) {
+                qDebug() << "IDE trouvé, nom envoyé à l'Arduino : " << nom;
+
+                QMessageBox::information(nullptr, QObject::tr("OK"),
+                                         QObject::tr("IDE trouvé, nom envoyé à l'Arduino."
+                                                     "Cliquez sur Annuler pour quitter."), QMessageBox::Cancel);
+            } else {
+                qDebug() << "Échec de l'envoi du nom à l'Arduino.";
+            }
+        } else {
+            // Aucune correspondance trouvée, envoyer une réponse vide à l'Arduino
+            QByteArray emptyResponse = "0";
+            int writeResult = myArduino.write_to_arduino(emptyResponse);
+
+            if (writeResult == 1) {
+                qDebug() << "Aucune correspondance trouvée, réponse vide envoyée à l'Arduino.";
+            } else {
+                qDebug() << "Échec de l'envoi de la réponse vide à l'Arduino.";
+            }
+        }
+    } else {
+        // La conversion en int a échoué
+        qDebug() << "Échec de la conversion du matricule Arduino en entier.";
+        // Traitez ce cas en conséquence (par exemple, affichez un message d'erreur)
+    }
+}

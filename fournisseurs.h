@@ -10,7 +10,7 @@
 class Fournisseurs
 {
 private:
-    int ID;
+    int IDF;
     QString nomF;
     QString nom_entreprise;
     QString adresse;
@@ -38,15 +38,18 @@ public:
 */
     QMap<QString, int> getFournisseur_Statistics();
 
+    int adresse_calcul(QString adr);
+    int adresse_calcul_total(QString adr);
 
-    int getID();
+
+    int getIDF();
     QString getnomF();
     QString getnom_entreprise();
     QString getadresse();
     QString getemail();
     int getnum();
 
-    void setID(int);
+    void setIDF(int);
     void setnomF(QString);
     void setnom_entreprise(QString);
     void setadresse(QString);

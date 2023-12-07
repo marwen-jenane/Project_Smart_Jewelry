@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "notification.h"
 #include "historique.h"
+#include "arduino.h"
 
 #include <QtCharts/QChartView>
 #include <QtCharts/QPieSeries>
@@ -63,6 +64,10 @@ private slots:
      void on_tabWidget_tabBarClicked(int index);
 
 
+void loop();
+
+signals:
+    void signal_arduino(int code);
 
 private:
     Ui::MainWindow *ui;
@@ -70,5 +75,12 @@ private:
     notification N;
     historique H;
     QChartView *FournisseurStatisticsChartView;
+    //Arduino A;
+
+    QSerialPort *serial;  // Declare QSerialPort object
+
+    Arduino myArduino;
+      QByteArray data; // variable contenant les données reçues
+      QTimer *timer;
 };
 #endif // MAINWINDOW_H

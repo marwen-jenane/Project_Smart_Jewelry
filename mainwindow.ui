@@ -30,7 +30,7 @@
 </string>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
@@ -145,7 +145,7 @@ border-radius: 35px ;
         <string>Numéro</string>
        </property>
       </widget>
-      <widget class="QLineEdit" name="le_nom">
+      <widget class="QLineEdit" name="le_nomF">
        <property name="geometry">
         <rect>
          <x>170</x>
@@ -210,7 +210,7 @@ QPushButton:Hover
         <bool>false</bool>
        </property>
       </widget>
-      <widget class="QLineEdit" name="le_ID">
+      <widget class="QLineEdit" name="le_IDF">
        <property name="geometry">
         <rect>
          <x>170</x>
@@ -241,7 +241,7 @@ QLineEdit:Hover
         <string/>
        </property>
       </widget>
-      <widget class="QLineEdit" name="le_adresse">
+      <widget class="QLineEdit" name="le_adresseF">
        <property name="geometry">
         <rect>
          <x>170</x>
@@ -272,7 +272,7 @@ QLineEdit:Hover
         <string/>
        </property>
       </widget>
-      <widget class="QLineEdit" name="le_email">
+      <widget class="QLineEdit" name="le_emailF">
        <property name="geometry">
         <rect>
          <x>170</x>
@@ -303,7 +303,7 @@ QLineEdit:Hover
         <string/>
        </property>
       </widget>
-      <widget class="QLineEdit" name="le_numero">
+      <widget class="QLineEdit" name="le_numeroF">
        <property name="geometry">
         <rect>
          <x>170</x>
@@ -467,12 +467,12 @@ QPushButton:Hover
       <zorder>label_6</zorder>
       <zorder>label_7</zorder>
       <zorder>label_8</zorder>
-      <zorder>le_nom</zorder>
+      <zorder>le_nomF</zorder>
       <zorder>pb_ajouter</zorder>
-      <zorder>le_ID</zorder>
-      <zorder>le_adresse</zorder>
-      <zorder>le_email</zorder>
-      <zorder>le_numero</zorder>
+      <zorder>le_IDF</zorder>
+      <zorder>le_adresseF</zorder>
+      <zorder>le_emailF</zorder>
+      <zorder>le_numeroF</zorder>
       <zorder>label_2</zorder>
       <zorder>le_nomEntreprise</zorder>
       <zorder>pb_clear</zorder>
@@ -603,6 +603,21 @@ QLineEdit:Hover
         <width>791</width>
         <height>341</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton {
+    border: none;
+    font: 6pt &quot;Sitka Display Semibold&quot;;
+    text-align: middle;
+}
+
+QPushButton:hover {
+    color: rgb(255, 255, 255);
+    background-color:rgb(19, 255, 86);
+    border: none;
+    text-align: middle;
+}
+</string>
       </property>
      </widget>
      <widget class="QLineEdit" name="x_recherche">

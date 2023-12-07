@@ -3,7 +3,7 @@
 #include<QtSql/QSqlQuery>
 #-------------------------------------------------
 
-QT       += core gui sql
+QT       += core gui sql serialport
 QT += core gui printsupport
 QT += core gui sql multimedia multimediawidgets printsupport charts widgets axcontainer
 
@@ -24,6 +24,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    arduino.cpp \
     connection.cpp \
     fournisseurs.cpp \
     historique.cpp \
@@ -32,6 +33,7 @@ SOURCES += \
     notification.cpp
 
 HEADERS += \
+    arduino.h \
     connection.h \
     fournisseurs.h \
     historique.h \
